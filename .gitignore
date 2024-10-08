@@ -19,3 +19,5 @@ __pycache__/
 
 # Ignore compiled C extensions
 *.so
+venv/
+__pycache__/
