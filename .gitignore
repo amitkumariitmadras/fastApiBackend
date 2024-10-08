@@ -1,0 +1,21 @@
+# Ignore virtual environment
+venv/
+env/
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+
+# Ignore log files and database
+*.log
+*.sqlite3
+
+# Ignore IDE project files
+.idea/
+.vscode/
+
+# Ignore Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore compiled C extensions
+*.so
