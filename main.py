@@ -3,11 +3,12 @@
 
 from typing import Union
 
-from fastapi import FastAPI
+from fastapi import FastAPI, status, Response, HTTPException
 
 from pydantic import BaseModel
 from fastapi.params import Body
 from typing import Optional
+from random import randrange
 
 app = FastAPI()
 
@@ -21,7 +22,10 @@ class Post(BaseModel):
     description: str
     published: bool = True
     rating: Optional[int] = None
+    id: int = None
 
+
+my_post =  [{"title": "hey title 1", "description": "description 1", "id": 1},{"title": "hey title 2", "description": "description 2", "id": 2}]
 
 @app.get("/")
 async def read_root():
@@ -41,8 +45,11 @@ async def update_item(item_id:int, item: Item):
 #     print(payload)
 #     return {"post": f"title: {payload['title']}, description: {payload['description']}", "title": payload["title"],"description": payload["description"]}
 
-@app.post("/createPost")
+@app.post("/posts", status_code = status.HTTP_201_CREATED)
 async def create_post(new_post: Post):
     print(new_post)
     val = new_post.dict()
-    return {"post": f"title: {new_post.title}, description: {new_post.description}", "dict": val}
+    val["id"] = randrange(1,1000000)
+    my_post.append(val)
+
+    return {"dict": my_post}
