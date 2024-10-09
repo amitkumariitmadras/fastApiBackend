@@ -15,6 +15,10 @@ class Item(BaseModel):
     price: float
     is_offer: Union[bool, None] = None
 
+class Post(BaseModel):
+    title: str
+    description: str
+
 
 @app.get("/")
 async def read_root():
@@ -29,7 +33,12 @@ async def read_item(item_id: int, q: Union[str, None] = None):
 async def update_item(item_id:int, item: Item):
     return {"item_name": item.name, "item_id": item_id} 
 
+# @app.post("/createPost")
+# async def create_post(payload: dict = Body(...)):
+#     print(payload)
+#     return {"post": f"title: {payload['title']}, description: {payload['description']}", "title": payload["title"],"description": payload["description"]}
+
 @app.post("/createPost")
-async def create_post(payload: dict = Body(...)):
-    print(payload)
-    return {"post": f"title: {payload['title']}, description: {payload['description']}", "title": payload["title"],"description": payload["description"]}
+async def create_post(new_post: Post):
+    print(new_post)
+    return {"post": f"title: {new_post.title}, description: {new_post.description}"}
