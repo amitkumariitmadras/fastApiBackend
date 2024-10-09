@@ -7,6 +7,7 @@ from fastapi import FastAPI
 
 from pydantic import BaseModel
 from fastapi.params import Body
+from typing import Optional
 
 app = FastAPI()
 
@@ -18,6 +19,8 @@ class Item(BaseModel):
 class Post(BaseModel):
     title: str
     description: str
+    published: bool = True
+    rating: Optional[int] = None
 
 
 @app.get("/")
@@ -41,4 +44,5 @@ async def update_item(item_id:int, item: Item):
 @app.post("/createPost")
 async def create_post(new_post: Post):
     print(new_post)
-    return {"post": f"title: {new_post.title}, description: {new_post.description}"}
+    val = new_post.dict()
+    return {"post": f"title: {new_post.title}, description: {new_post.description}", "dict": val}
