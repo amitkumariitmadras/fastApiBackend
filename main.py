@@ -6,6 +6,7 @@ from typing import Union
 from fastapi import FastAPI
 
 from pydantic import BaseModel
+from fastapi.params import Body
 
 app = FastAPI()
 
@@ -26,4 +27,9 @@ async def read_item(item_id: int, q: Union[str, None] = None):
 
 @app.put("/items/{item_id}")
 async def update_item(item_id:int, item: Item):
-    return {"item_name": item.name, "item_id": item_id}
+    return {"item_name": item.name, "item_id": item_id} 
+
+@app.post("/createPost")
+async def create_post(payload: dict = Body(...)):
+    print(payload)
+    return {"post": f"title: {payload['title']}, description: {payload['description']}", "title": payload["title"],"description": payload["description"]}
