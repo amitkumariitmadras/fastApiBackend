@@ -65,9 +65,15 @@ async def read_posts():
     return {"posts": val}
 
 
-@app.get("/items/{item_id}")
-async def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+@app.get("/posts/{post_id}")
+async def get_onepost(post_id: int):
+    print(post_id)
+
+    cursor.execute(""" SELECT * FROM posts WHERE id = %s""",(str(post_id)))
+    val = cursor.fetchone()
+    if not val:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return {"post": val}
 
 @app.put("/items/{item_id}")
 async def update_item(item_id:int, item: Item):
@@ -81,11 +87,15 @@ async def update_item(item_id:int, item: Item):
 
 @app.post("/posts", status_code = status.HTTP_201_CREATED)
 async def create_post(new_post: Post):
-    print(new_post)
-    val = new_post.dict()
-    val["id"] = randrange(1,1000000)
-    my_post.append(val)
+    # print(new_post)
+    # val = new_post.dict()
+    # val["id"] = randrange(1,1000000)
+    # my_post.append(val)
 
-    return {"dict": my_post}
+    cursor.execute("""  INSERT INTO posts (title, description) VALUES (%s, %s) RETURNING * """,(new_post.title,new_post.description))
+    val = cursor.fetchone()
+    conn.commit()
+
+    return {"post created": val}
 
     
