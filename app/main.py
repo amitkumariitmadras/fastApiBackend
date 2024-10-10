@@ -53,3 +53,5 @@ async def create_post(new_post: Post):
     my_post.append(val)
 
     return {"dict": my_post}
+
+    
