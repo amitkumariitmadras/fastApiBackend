@@ -81,11 +81,19 @@ async def delete_post(post_id: int):
     val = cursor.fetchone()
     conn.commit()
 
+    if not val:
+        raise HTTPException(status_code=404, detail="Item not found")
+
     return {"detail": "Post deleted", "deleted": val}
 
-@app.put("/items/{item_id}")
-async def update_item(item_id:int, item: Item):
-    return {"item_name": item.name, "item_id": item_id} 
+@app.put("/posts/{post_id}")
+async def update_post(post_id:int, post: Post):
+    cursor.execute(""" UPDATE posts SET title=%s, description=%s WHERE id = %s RETURNING *""",(post.title, post.description, str(post_id)))
+    val = cursor.fetchone()
+    conn.commit()
+    if not val:
+        raise HTTPException(status_code=404, detail=f"Item of Id {post_id} not found")
+    return {"detail": "Post updated", "post": val}
 
 # @app.post("/createPost")
 # async def create_post(payload: dict = Body(...)):
