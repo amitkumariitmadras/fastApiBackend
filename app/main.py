@@ -75,6 +75,14 @@ async def get_onepost(post_id: int):
         raise HTTPException(status_code=404, detail="Item not found")
     return {"post": val}
 
+@app.delete("/posts/{post_id}")
+async def delete_post(post_id: int):
+    cursor.execute(""" DELETE FROM posts WHERE id = %s RETURNING *""",(str(post_id)))
+    val = cursor.fetchone()
+    conn.commit()
+
+    return {"detail": "Post deleted", "deleted": val}
+
 @app.put("/items/{item_id}")
 async def update_item(item_id:int, item: Item):
     return {"item_name": item.name, "item_id": item_id} 
