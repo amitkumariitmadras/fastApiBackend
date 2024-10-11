@@ -34,7 +34,7 @@ class Item(BaseModel):
 
 class Post(BaseModel):
     title: str
-    description: str
+    content: str
     published: bool = True
 
 
@@ -65,17 +65,17 @@ async def read_root():
 
     return {"Hello": "World"}
 
-@app.get("/sqlalchemy")
-async def test_post(db: Session = Depends(get_db)):
+@app.get("/posts")
+async def read_posts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
     # print(db.query(models.Post))
     return {"posts": posts}
 
-@app.get("/posts")
-async def read_posts():
-    cursor.execute(""" SELECT * FROM posts""")
-    val = cursor.fetchall()
-    return {"posts": val}
+# @app.get("/posts")
+# async def read_posts():
+#     cursor.execute(""" SELECT * FROM posts""")
+#     val = cursor.fetchall()
+#     return {"posts": val}
 
 
 @app.get("/posts/{post_id}")
@@ -110,12 +110,18 @@ async def update_post(post_id:int, post: Post):
 
 
 @app.post("/posts", status_code = status.HTTP_201_CREATED)
-async def create_post(new_post: Post):
-    cursor.execute("""  INSERT INTO posts (title, description) VALUES (%s, %s) RETURNING * """,(new_post.title,new_post.description))
-    val = cursor.fetchone()
-    conn.commit()
+async def create_post(new_post: Post, db: Session = Depends(get_db)):
+   newP =  models.Post(**new_post.dict())           
+   db.add(newP)
+   db.commit()
+   db.refresh(newP)
+   return {"post": newP}
 
-    return {"post created": val}
+    # cursor.execute("""  INSERT INTO posts (title, description) VALUES (%s, %s) RETURNING * """,(new_post.title,new_post.description))
+    # val = cursor.fetchone()
+    # conn.commit()
+
+    # return {"post created": val}
 
     
 
