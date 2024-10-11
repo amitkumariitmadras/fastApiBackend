@@ -79,14 +79,18 @@ async def read_posts(db: Session = Depends(get_db)):
 
 
 @app.get("/posts/{post_id}")
-async def get_onepost(post_id: int):
-    print(post_id)
-
-    cursor.execute(""" SELECT * FROM posts WHERE id = %s""",(str(post_id)))
-    val = cursor.fetchone()
+async def get_onepost(post_id: int, db: Session = Depends(get_db)):
+    # print(post_id)
+    val = db.query(models.Post).filter(models.Post.id == str(post_id)).first()
     if not val:
         raise HTTPException(status_code=404, detail="Item not found")
     return {"post": val}
+    # cursor.execute(""" SELECT * FROM posts WHERE id = %s""",(str(post_id)))
+    # val = cursor.fetchone()
+    # if not val:
+    #     raise HTTPException(status_code=404, detail="Item not found")
+    # return {"post": val}
+
 
 @app.delete("/posts/{post_id}")
 async def delete_post(post_id: int):
