@@ -4,6 +4,7 @@ from typing import Union
 
 from fastapi import FastAPI, status, Response, HTTPException, Depends
 
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from fastapi.params import Body
 from typing import Optional
@@ -93,13 +94,24 @@ async def get_onepost(post_id: int, db: Session = Depends(get_db)):
 
 
 @app.delete("/posts/{post_id}")
-async def delete_post(post_id: int):
-    cursor.execute(""" DELETE FROM posts WHERE id = %s RETURNING *""",(str(post_id)))
-    val = cursor.fetchone()
-    conn.commit()
+async def delete_post(post_id: int, db: Session = Depends(get_db)):
 
-    if not val:
-        raise HTTPException(status_code=404, detail="Item not found")
+    val = db.query(models.Post).filter(models.Post.id == str(post_id))
+    if not val.first():
+        raise HTTPException(status_code=404, detail=f"Item of Id {post_id} not found")
+    
+    val.delete(synchronize_session=False)
+    db.commit()
+    # Return a JSON response with a custom message and status code 200
+    return JSONResponse(content={"message": f"Post with ID {post_id} has been successfully deleted."},
+                        status_code=status.HTTP_200_OK)
+    # return JSONResponse(content = {"post deleted"},status_code=status.HTTP_204_NO_CONTENT)
+    # cursor.execute(""" DELETE FROM posts WHERE id = %s RETURNING *""",(str(post_id)))
+    # val = cursor.fetchone()
+    # conn.commit()
+
+    # if not val:
+    #     raise HTTPException(status_code=404, detail="Item not found")
 
     return {"detail": "Post deleted", "deleted": val}
 
