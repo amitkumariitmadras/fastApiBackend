@@ -27,18 +27,6 @@ load_dotenv()
 app = FastAPI()
 
 
-
-class Item(BaseModel):
-    name: str
-    price: float
-    is_offer: Union[bool, None] = None
-
-class Post(BaseModel):
-    title: str
-    content: str
-    published: bool = True
-
-
 while True:
         try:
             conn = psycopg2.connect(
@@ -116,7 +104,7 @@ async def delete_post(post_id: int, db: Session = Depends(get_db)):
     return {"detail": "Post deleted", "deleted": val}
 
 @app.put("/posts/{post_id}")
-async def update_post(post_id:int, post: Post, db: Session = Depends(get_db)):
+async def update_post(post_id:int, post: schema.Post, db: Session = Depends(get_db)):
     post_query = db.query(models.Post).filter(models.Post.id == str(post_id))
     posting = post_query.first()
 
@@ -136,7 +124,7 @@ async def update_post(post_id:int, post: Post, db: Session = Depends(get_db)):
 
 
 @app.post("/posts", status_code = status.HTTP_201_CREATED)
-async def create_post(new_post: Post, db: Session = Depends(get_db)):
+async def create_post(new_post: schema.Post, db: Session = Depends(get_db)):
    newP =  models.Post(**new_post.dict())           
    db.add(newP)
    db.commit()
