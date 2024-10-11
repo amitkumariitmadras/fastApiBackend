@@ -95,19 +95,9 @@ async def update_post(post_id:int, post: Post):
         raise HTTPException(status_code=404, detail=f"Item of Id {post_id} not found")
     return {"detail": "Post updated", "post": val}
 
-# @app.post("/createPost")
-# async def create_post(payload: dict = Body(...)):
-#     print(payload)
-#     return {"post": f"title: {payload['title']}, description: {payload['description']}", "title": payload["title"],"description": payload["description"]}
-
 
 @app.post("/posts", status_code = status.HTTP_201_CREATED)
 async def create_post(new_post: Post):
-    # print(new_post)
-    # val = new_post.dict()
-    # val["id"] = randrange(1,1000000)
-    # my_post.append(val)
-
     cursor.execute("""  INSERT INTO posts (title, description) VALUES (%s, %s) RETURNING * """,(new_post.title,new_post.description))
     val = cursor.fetchone()
     conn.commit()
@@ -115,3 +105,4 @@ async def create_post(new_post: Post):
     return {"post created": val}
 
     
+
