@@ -2,7 +2,7 @@
 import os
 from typing import Union
 
-from fastapi import FastAPI, status, Response, HTTPException
+from fastapi import FastAPI, status, Response, HTTPException, Depends
 
 from pydantic import BaseModel
 from fastapi.params import Body
@@ -13,10 +13,24 @@ from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 import time
 
+from . import models, schema
+from .database import SessionLocal, engine
+from sqlalchemy.orm import Session
+
+
+models.Base.metadata.create_all(bind=engine)
+
 load_dotenv()
 
 
 app = FastAPI()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 class Item(BaseModel):
     name: str
@@ -57,6 +71,10 @@ my_post =  [{"title": "hey title 1", "description": "description 1", "id": 1},{"
 async def read_root():
 
     return {"Hello": "World"}
+
+@app.get("/sqlalchemy")
+async def test_post(db: Session = Depends(get_db)):
+    return {"status": "success"}
 
 @app.get("/posts")
 async def read_posts():
