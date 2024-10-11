@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 import time
 
 from . import models, schema
-from .database import SessionLocal, engine
+from .database import engine, get_db
 from sqlalchemy.orm import Session
 
 
@@ -25,12 +25,7 @@ load_dotenv()
 
 app = FastAPI()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+
 
 class Item(BaseModel):
     name: str
@@ -45,8 +40,6 @@ class Post(BaseModel):
 
 while True:
         try:
-            print(os.getenv('USERNAME'))
-            print(f"Password: {os.getenv('PASSWORD')}")
             conn = psycopg2.connect(
                 host=os.getenv('HOST'),
                 database=os.getenv('DATABASE'),
@@ -74,7 +67,9 @@ async def read_root():
 
 @app.get("/sqlalchemy")
 async def test_post(db: Session = Depends(get_db)):
-    return {"status": "success"}
+    posts = db.query(models.Post).all()
+    # print(db.query(models.Post))
+    return {"posts": posts}
 
 @app.get("/posts")
 async def read_posts():
