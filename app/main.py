@@ -1,6 +1,6 @@
 # initialize the first python file
 import os
-from typing import Union
+from typing import List, Union
 
 from fastapi import FastAPI, status, Response, HTTPException, Depends
 
@@ -54,7 +54,7 @@ async def read_root():
 
     return {"Hello": "World"}
 
-@app.get("/posts")
+@app.get("/posts", response_model=List[schema.Post])
 async def read_posts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
     # print(db.query(models.Post))
@@ -123,7 +123,7 @@ async def update_post(post_id:int, post: schema.PostCreate, db: Session = Depend
     # return {"detail": "Post updated", "post": val}
 
 
-@app.post("/posts", status_code = status.HTTP_201_CREATED, response_model=schema.PostCreate)
+@app.post("/posts", status_code = status.HTTP_201_CREATED, response_model=schema.Post)
 async def create_post(new_post: schema.PostCreate, db: Session = Depends(get_db)):
    newP =  models.Post(**new_post.dict())           
    db.add(newP)
