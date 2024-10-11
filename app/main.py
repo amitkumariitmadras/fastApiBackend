@@ -116,13 +116,23 @@ async def delete_post(post_id: int, db: Session = Depends(get_db)):
     return {"detail": "Post deleted", "deleted": val}
 
 @app.put("/posts/{post_id}")
-async def update_post(post_id:int, post: Post):
-    cursor.execute(""" UPDATE posts SET title=%s, description=%s WHERE id = %s RETURNING *""",(post.title, post.description, str(post_id)))
-    val = cursor.fetchone()
-    conn.commit()
-    if not val:
+async def update_post(post_id:int, post: Post, db: Session = Depends(get_db)):
+    post_query = db.query(models.Post).filter(models.Post.id == str(post_id))
+    posting = post_query.first()
+
+    if not post_query.first():
         raise HTTPException(status_code=404, detail=f"Item of Id {post_id} not found")
-    return {"detail": "Post updated", "post": val}
+    
+    post_query.update(post.dict(),synchronize_session=False)
+    db.commit()
+
+    return JSONResponse(content={"message":"post updated"},status_code= status.HTTP_202_ACCEPTED)
+    # cursor.execute(""" UPDATE posts SET title=%s, description=%s WHERE id = %s RETURNING *""",(post.title, post.description, str(post_id)))
+    # val = cursor.fetchone()
+    # conn.commit()
+    # if not val:
+    #     raise HTTPException(status_code=404, detail=f"Item of Id {post_id} not found")
+    # return {"detail": "Post updated", "post": val}
 
 
 @app.post("/posts", status_code = status.HTTP_201_CREATED)
