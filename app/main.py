@@ -58,7 +58,7 @@ async def read_root():
 async def read_posts(db: Session = Depends(get_db)):
     posts = db.query(models.Post).all()
     # print(db.query(models.Post))
-    return {"posts": posts}
+    return posts
 
 # @app.get("/posts")
 # async def read_posts():
@@ -67,13 +67,13 @@ async def read_posts(db: Session = Depends(get_db)):
 #     return {"posts": val}
 
 
-@app.get("/posts/{post_id}")
+@app.get("/posts/{post_id}", response_model=schema.PostBase)
 async def get_onepost(post_id: int, db: Session = Depends(get_db)):
     # print(post_id)
     val = db.query(models.Post).filter(models.Post.id == str(post_id)).first()
     if not val:
         raise HTTPException(status_code=404, detail="Item not found")
-    return {"post": val}
+    return val
     # cursor.execute(""" SELECT * FROM posts WHERE id = %s""",(str(post_id)))
     # val = cursor.fetchone()
     # if not val:
@@ -104,7 +104,7 @@ async def delete_post(post_id: int, db: Session = Depends(get_db)):
     return {"detail": "Post deleted", "deleted": val}
 
 @app.put("/posts/{post_id}")
-async def update_post(post_id:int, post: schema.Post, db: Session = Depends(get_db)):
+async def update_post(post_id:int, post: schema.PostCreate, db: Session = Depends(get_db)):
     post_query = db.query(models.Post).filter(models.Post.id == str(post_id))
     posting = post_query.first()
 
@@ -123,13 +123,13 @@ async def update_post(post_id:int, post: schema.Post, db: Session = Depends(get_
     # return {"detail": "Post updated", "post": val}
 
 
-@app.post("/posts", status_code = status.HTTP_201_CREATED)
-async def create_post(new_post: schema.Post, db: Session = Depends(get_db)):
+@app.post("/posts", status_code = status.HTTP_201_CREATED, response_model=schema.PostCreate)
+async def create_post(new_post: schema.PostCreate, db: Session = Depends(get_db)):
    newP =  models.Post(**new_post.dict())           
    db.add(newP)
    db.commit()
    db.refresh(newP)
-   return {"post": newP}
+   return newP
 
     # cursor.execute("""  INSERT INTO posts (title, description) VALUES (%s, %s) RETURNING * """,(new_post.title,new_post.description))
     # val = cursor.fetchone()
