@@ -57,8 +57,12 @@ async def get_onepost(post_id: int, db: Session = Depends(get_db), curr_user: in
 async def delete_post(post_id: int, db: Session = Depends(get_db), curr_user: int = Depends(oAuth.get_current_user)):
 
     val = db.query(models.Post).filter(models.Post.id == str(post_id))
-    if not val.first():
+    newVal = val.first()
+    if not newVal:
         raise HTTPException(status_code=404, detail=f"Item of Id {post_id} not found")
+    
+    if newVal.owner_id != curr_user.id:
+        raise HTTPException(status_code=403, detail="You are not authorized to delete this post")
     
     val.delete(synchronize_session=False)
     db.commit()
@@ -80,8 +84,12 @@ async def update_post(post_id:int, post: schema.PostCreate, db: Session = Depend
     post_query = db.query(models.Post).filter(models.Post.id == str(post_id))
     posting = post_query.first()
 
-    if not post_query.first():
+    if not posting:
         raise HTTPException(status_code=404, detail=f"Item of Id {post_id} not found")
+    
+
+    if posting.owner_id != curr_user.id:
+        raise HTTPException(status_code=403, detail="You are not authorized to delete this post")
     
     post_query.update(post.dict(),synchronize_session=False)
     db.commit()
@@ -98,7 +106,7 @@ async def update_post(post_id:int, post: schema.PostCreate, db: Session = Depend
 @router.post("/", status_code = status.HTTP_201_CREATED, response_model=schema.Post)
 async def create_post(new_post: schema.PostCreate, db: Session = Depends(get_db), curr_user: int = Depends(oAuth.get_current_user)):
    print(curr_user.email)
-   newP =  models.Post(**new_post.dict())           
+   newP =  models.Post(owner_id = curr_user.id, **new_post.dict())           
    db.add(newP)
    db.commit()
    db.refresh(newP)
