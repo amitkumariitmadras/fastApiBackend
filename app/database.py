@@ -5,6 +5,10 @@ from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
 
+import psycopg2
+from psycopg2.extras import RealDictCursor
+import time
+
 load_dotenv()
 
 host=os.getenv('HOST')
@@ -26,3 +30,26 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+
+
+#Just for documentation
+
+# while True:
+#         try:
+#             conn = psycopg2.connect(
+#                 host=os.getenv('HOST'),
+#                 database=os.getenv('DATABASE'),
+#                 user= os.getenv('USERNAME'),
+#                 password=os.getenv('PASSWORD')
+#             )
+
+#             cursor = conn.cursor(cursor_factory=RealDictCursor)
+#             print("Database connection established")
+#             break
+
+#         except (Exception, psycopg2.Error) as error:
+#             print ("Error while connecting to PostgreSQL", error)
+#             time.sleep(2)
+#             break
