@@ -27,7 +27,7 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[schema.Post])
-async def read_posts(db: Session = Depends(get_db), ):
+async def read_posts(db: Session = Depends(get_db), user_id: int = Depends(oAuth.get_current_user) ):
     posts = db.query(models.Post).all()
     # print(db.query(models.Post))
     return posts
@@ -40,7 +40,7 @@ async def read_posts(db: Session = Depends(get_db), ):
 
 
 @router.get("/{post_id}", response_model=schema.PostBase)
-async def get_onepost(post_id: int, db: Session = Depends(get_db)):
+async def get_onepost(post_id: int, db: Session = Depends(get_db), user_id: int = Depends(oAuth.get_current_user)):
     # print(post_id)
     val = db.query(models.Post).filter(models.Post.id == str(post_id)).first()
     if not val:
@@ -54,7 +54,7 @@ async def get_onepost(post_id: int, db: Session = Depends(get_db)):
 
 
 @router.delete("/{post_id}")
-async def delete_post(post_id: int, db: Session = Depends(get_db)):
+async def delete_post(post_id: int, db: Session = Depends(get_db), user_id: int = Depends(oAuth.get_current_user)):
 
     val = db.query(models.Post).filter(models.Post.id == str(post_id))
     if not val.first():
@@ -76,7 +76,7 @@ async def delete_post(post_id: int, db: Session = Depends(get_db)):
     return {"detail": "Post deleted", "deleted": val}
 
 @router.put("/{post_id}")
-async def update_post(post_id:int, post: schema.PostCreate, db: Session = Depends(get_db)):
+async def update_post(post_id:int, post: schema.PostCreate, db: Session = Depends(get_db), user_id: int = Depends(oAuth.get_current_user)):
     post_query = db.query(models.Post).filter(models.Post.id == str(post_id))
     posting = post_query.first()
 
