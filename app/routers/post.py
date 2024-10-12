@@ -1,7 +1,7 @@
 from fastapi import FastAPI, status, Response, HTTPException, Depends, APIRouter
 from typing import List, Union
 
-from .. import schema, models, utils
+from .. import schema, models, utils, oAuth
 
 
 # initialize the first python file
@@ -27,7 +27,7 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[schema.Post])
-async def read_posts(db: Session = Depends(get_db)):
+async def read_posts(db: Session = Depends(get_db), ):
     posts = db.query(models.Post).all()
     # print(db.query(models.Post))
     return posts
@@ -96,7 +96,8 @@ async def update_post(post_id:int, post: schema.PostCreate, db: Session = Depend
 
 
 @router.post("/", status_code = status.HTTP_201_CREATED, response_model=schema.Post)
-async def create_post(new_post: schema.PostCreate, db: Session = Depends(get_db)):
+async def create_post(new_post: schema.PostCreate, db: Session = Depends(get_db), user_id: int = Depends(oAuth.get_current_user)):
+#    print(user_id)
    newP =  models.Post(**new_post.dict())           
    db.add(newP)
    db.commit()
