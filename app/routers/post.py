@@ -39,7 +39,7 @@ async def read_posts(db: Session = Depends(get_db), curr_user: int = Depends(oAu
 #     return {"posts": val}
 
 
-@router.get("/{post_id}", response_model=schema.PostBase)
+@router.get("/{post_id}", response_model=schema.Post)
 async def get_onepost(post_id: int, db: Session = Depends(get_db), curr_user: int = Depends(oAuth.get_current_user)):
     # print(post_id)
     val = db.query(models.Post).filter(models.Post.id == str(post_id)).first()
@@ -102,6 +102,7 @@ async def create_post(new_post: schema.PostCreate, db: Session = Depends(get_db)
    db.add(newP)
    db.commit()
    db.refresh(newP)
+#    print(newP)
    return newP
 
     # cursor.execute("""  INSERT INTO posts (title, description) VALUES (%s, %s) RETURNING * """,(new_post.title,new_post.description))
