@@ -5,9 +5,9 @@ from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
 
-import psycopg2
-from psycopg2.extras import RealDictCursor
-import time
+# import psycopg2
+# from psycopg2.extras import RealDictCursor
+# import time
 
 load_dotenv()
 
