@@ -3,6 +3,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
+from .config import settings
+
+print(settings.database_username)
 
 
 # import psycopg2
@@ -11,13 +14,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-host=os.getenv('HOST')
-database=os.getenv('DATABASE')
-user= os.getenv('USERNAME')
-password=os.getenv('PASSWORD')
+# host=os.getenv('HOST')
+# database=os.getenv('DATABASE')
+# user= os.getenv('USERNAME')
+# password=os.getenv('PASSWORD')
 
 
-SQLALCHEMY_DATABASE_URL = f"postgresql://{user}:{password}@{host}/{database}"
+
+# SQLALCHEMY_DATABASE_URL = f"postgresql://{user}:{password}@{host}/{database}"
+SQLALCHEMY_DATABASE_URL = f'postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}'
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
