@@ -46,12 +46,15 @@ async def read_posts(db: Session = Depends(get_db), curr_user: int = Depends(oAu
 #     return {"posts": val}
 
 
-@router.get("/{post_id}", response_model=schema.Post)
+@router.get("/{post_id}", response_model=schema.PostOut)
 async def get_onepost(post_id: int, db: Session = Depends(get_db), curr_user: int = Depends(oAuth.get_current_user)):
     # print(post_id)
-    val = db.query(models.Post).filter(models.Post.id == str(post_id)).first()
+    # val = db.query(models.Post).filter(models.Post.id == str(post_id)).first()
+    val = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).join(
+        models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id).filter(models.Post.id == str(post_id)).first()
     if not val:
         raise HTTPException(status_code=404, detail="Item not found")
+    
     return val
     # cursor.execute(""" SELECT * FROM posts WHERE id = %s""",(str(post_id)))
     # val = cursor.fetchone()
