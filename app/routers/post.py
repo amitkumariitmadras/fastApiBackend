@@ -2,7 +2,7 @@ from fastapi import FastAPI, status, Response, HTTPException, Depends, APIRouter
 from typing import List, Union
 
 from .. import schema, models, utils, oAuth
-
+from sqlalchemy import func
 
 # initialize the first python file
 import os
@@ -26,12 +26,17 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[schema.Post])
+@router.get("/", response_model=List[schema.PostOut])
 async def read_posts(db: Session = Depends(get_db), curr_user: int = Depends(oAuth.get_current_user), limit: int = 10, skip: int =0, search: Optional[str] = ""):
-    posts = db.query(models.Post).filter(models.Post.title.contains(search)).offset(skip).limit(limit).all()
+
+
+    # posts = db.query(models.Post).filter(models.Post.title.contains(search)).offset(skip).limit(limit).all()
     # print(db.query(models.Post))
     # %20 as space
     # {{URL}}posts?limit=5&skip=1&search=lagta%20hello
+
+    posts = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).join(
+        models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id).all()
     return posts
 
 # @app.get("/posts")
