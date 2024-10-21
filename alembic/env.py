@@ -2,7 +2,7 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-from app.models import Base
+from app.models import Base # used app.models instead of app.database cause it will allow us to update the table 
 from alembic import context
 from app.config import settings
 
